@@ -1,4 +1,5 @@
 name: Create Release Notes
+
 on:
   pull_request:
     types: [closed]  # Trigger only when a pull request is closed
@@ -9,6 +10,7 @@ jobs:
   release:
     if: github.event.pull_request.merged == true  # Run only for merged PRs
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -46,10 +48,9 @@ jobs:
         id: commits
         run: |
           # Ensure proper escaping of commit messages
-          COMMITS=$(git log --pretty=format:"%s" 5d451be34630582d32a1be67acc1f158586525a5^..5d451be34630582d32a1be67acc1f158586525a5)
+          COMMITS=$(git log --pretty=format:"%s" HEAD~10..HEAD)  # Get commit messages for the last 10 commits
           COMMITS_ESCAPED=$(echo "$COMMITS" | sed ':a;N;$!ba;s/\n/\\n/g' | sed "s/'/\\'/g" | sed 's/"/\\"/g')
           echo "COMMITS=$COMMITS_ESCAPED" >> $GITHUB_ENV
-
 
       - name: Determine Version Bump
         id: bump_version
@@ -72,6 +73,10 @@ jobs:
       - name: Increment Version
         id: increment_version
         run: |
+          MAJOR=$(echo $VERSION | cut -d. -f1)
+          MINOR=$(echo $VERSION | cut -d. -f2)
+          PATCH=$(echo $VERSION | cut -d. -f3)
+
           if [ "$BUMP_TYPE" == "major" ]; then
             MAJOR=$((MAJOR + 1))
             MINOR=0
@@ -82,6 +87,7 @@ jobs:
           else
             PATCH=$((PATCH + 1))
           fi
+
           NEW_VERSION="v$MAJOR.$MINOR.$PATCH"
           echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
 
@@ -125,4 +131,3 @@ jobs:
             --notes-file release_notes.md
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
