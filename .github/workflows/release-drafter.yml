@@ -33,8 +33,11 @@ jobs:
           PR_BODY="${{ github.event.pull_request.body }}"
           PR_LABELS=$(echo '${{ toJson(github.event.pull_request.labels) }}' | jq -r '.[].name')
 
+          # Escape special characters and newlines in PR_BODY for GitHub Actions environment variables
+          PR_BODY_ESCAPED=$(echo "$PR_BODY" | sed ':a;N;$!ba;s/\n/\\n/g')
+          
           echo "PR_TITLE=$PR_TITLE" >> $GITHUB_ENV
-          echo "PR_BODY=$PR_BODY" >> $GITHUB_ENV
+          echo "PR_BODY=$PR_BODY_ESCAPED" >> $GITHUB_ENV
           echo "PR_LABELS=$PR_LABELS" >> $GITHUB_ENV
 
       - name: Get All Commit Messages
