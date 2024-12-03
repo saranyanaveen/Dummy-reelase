@@ -33,10 +33,12 @@ jobs:
           PR_BODY="${{ github.event.pull_request.body }}"
           PR_LABELS=$(echo '${{ toJson(github.event.pull_request.labels) }}' | jq -r '.[].name')
 
+
           # Escape special characters (e.g., single quotes, newlines) for PR_TITLE, PR_BODY, and PR_LABELS
           PR_TITLE_ESCAPED=$(echo "$PR_TITLE" | sed ':a;N;$!ba;s/\n/\\n/g' | sed "s/'/\\'/g" | sed 's/"/\\"/g')
           PR_BODY_ESCAPED=$(echo "$PR_BODY" | sed ':a;N;$!ba;s/\n/\\n/g' | sed "s/'/\\'/g" | sed 's/"/\\"/g')
           PR_LABELS_ESCAPED=$(echo "$PR_LABELS" | sed ':a;N;$!ba;s/\n/\\n/g' | sed "s/'/\\'/g" | sed 's/"/\\"/g')
+
 
           echo "PR_TITLE=$PR_TITLE_ESCAPED" >> $GITHUB_ENV
           echo "PR_BODY=$PR_BODY_ESCAPED" >> $GITHUB_ENV
@@ -49,6 +51,7 @@ jobs:
           COMMITS=$(git log --pretty=format:"%s" 5d451be34630582d32a1be67acc1f158586525a5^..5d451be34630582d32a1be67acc1f158586525a5)
           COMMITS_ESCAPED=$(echo "$COMMITS" | sed ':a;N;$!ba;s/\n/\\n/g' | sed "s/'/\\'/g" | sed 's/"/\\"/g')
           echo "COMMITS=$COMMITS_ESCAPED" >> $GITHUB_ENV
+
 
 
       - name: Determine Version Bump
@@ -125,4 +128,3 @@ jobs:
             --notes-file release_notes.md
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
