@@ -1,4 +1,5 @@
 name: Create Release Notes
+
 on:
   pull_request:
     types: [closed]
@@ -25,7 +26,10 @@ jobs:
           PR_LABELS=$(echo '${{ toJson(github.event.pull_request.labels) }}' | jq -r '.[].name')
 
           echo "PR_TITLE=$PR_TITLE" >> $GITHUB_ENV
-          echo "PR_BODY=$PR_BODY" >> $GITHUB_ENV
+          
+          # Handle multi-line PR_BODY by escaping newlines
+          echo -e "PR_BODY<<EOF\n$PR_BODY\nEOF" >> $GITHUB_ENV
+          
           echo "PR_LABELS=$PR_LABELS" >> $GITHUB_ENV
 
       - name: Debug Output
@@ -55,7 +59,7 @@ jobs:
           elif [[ "$PR_LABELS" == *"minor"* ]]; then
             MINOR=$((MINOR + 1))
             PATCH=0
-          else
+          elif [[ "$PR_LABELS" == *"patch"* ]]; then
             PATCH=$((PATCH + 1))
           fi
           NEW_VERSION="v$MAJOR.$MINOR.$PATCH"
