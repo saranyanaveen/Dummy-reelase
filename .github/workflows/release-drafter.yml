@@ -1,0 +1,136 @@
+---
+  name: Create Release Notes
+  on:
+    pull_request:
+      types:
+        - closed
+      branches:
+        - main
+  jobs:
+    release:
+      if: github.event.pull_request.merged == true
+      runs-on: ubuntu-latest
+      steps:
+        - name: Checkout code
+          uses: actions/checkout@v2
+          with:
+            fetch-depth: 0
+        - name: Set up GitHub CLI
+          run: |
+            sudo apt update
+            sudo apt install -y gh
+            echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
+        - name: Install jq
+          run: |
+            sudo apt-get update
+            sudo apt-get install -y jq
+        - name: Get PR Details
+          id: pr_details
+          run: >
+            PR_TITLE="${{ github.event.pull_request.title }}"
+  
+            PR_BODY="${{ github.event.pull_request.body }}"
+  
+            PR_LABELS=$(echo '${{ toJson(github.event.pull_request.labels) }}' | jq -r '.[].name')
+  
+  
+            # Escape special characters for PR_TITLE, PR_BODY, and PR_LABELS
+  
+            PR_TITLE_ESCAPED=$(echo "$PR_TITLE" | sed ':a;N;$!ba;s/\n/\\n/g' | sed "s/'/\\'/g" | sed 's/"/\\"/g')
+  
+            PR_BODY_ESCAPED=$(echo "$PR_BODY" | sed ':a;N;$!ba;s/\n/\\n/g' | sed "s/'/\\'/g" | sed 's/"/\\"/g')
+  
+            PR_LABELS_ESCAPED=$(echo "$PR_LABELS" | sed ':a;N;$!ba;s/\n/\\n/g' | sed "s/'/\\'/g" | sed 's/"/\\"/g')
+  
+  
+            echo "PR_TITLE=$PR_TITLE_ESCAPED" >> $GITHUB_ENV
+  
+            echo "PR_BODY=$PR_BODY_ESCAPED" >> $GITHUB_ENV
+  
+            echo "PR_LABELS=$PR_LABELS_ESCAPED" >> $GITHUB_ENV
+        - name: Get All Commit Messages
+          id: commits
+          run: >
+            COMMITS=$(git log --pretty=format:"%s" HEAD~10..HEAD)  # Get commit
+            messages for the last 10 commits
+  
+            COMMITS_ESCAPED=$(echo "$COMMITS" | sed ':a;N;$!ba;s/\n/\\n/g' | sed "s/'/\\'/g" | sed 's/"/\\"/g')
+  
+            echo "COMMITS=$COMMITS_ESCAPED" >> $GITHUB_ENV
+        - name: Determine Version Bump
+          id: bump_version
+          run: >
+            BUMP_TYPE="patch"
+  
+            if [[ "$PR_TITLE" == *"major"* ]] || echo "$PR_LABELS" | grep -q "major"; then
+              BUMP_TYPE="major"
+            elif [[ "$PR_TITLE" == *"minor"* ]] || echo "$PR_LABELS" | grep -q "minor"; then
+              BUMP_TYPE="minor"
+            fi
+  
+            echo "BUMP_TYPE=$BUMP_TYPE" >> $GITHUB_ENV
+        - name: Get Latest Tag
+          id: get_latest_tag
+          run: |
+            LATEST_TAG=$(git tag --sort=-v:refname | head -n 1 || echo "v0.0.0")
+            VERSION=${LATEST_TAG#v}
+            echo "LATEST_TAG=$LATEST_TAG" >> $GITHUB_ENV
+        - name: Increment Version
+          id: increment_version
+          run: |
+            MAJOR=$(echo $VERSION | cut -d. -f1)
+            MINOR=$(echo $VERSION | cut -d. -f2)
+            PATCH=$(echo $VERSION | cut -d. -f3)
+  
+            if [ "$BUMP_TYPE" == "major" ]; then
+              MAJOR=$((MAJOR + 1))
+              MINOR=0
+              PATCH=0
+            elif [ "$BUMP_TYPE" == "minor" ]; then
+              MINOR=$((MINOR + 1))
+              PATCH=0
+            else
+              PATCH=$((PATCH + 1))
+            fi
+  
+            NEW_VERSION="v$MAJOR.$MINOR.$PATCH"
+            echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
+        - name: Generate Release Notes
+          run: |
+            COMMITS="${COMMITS:-No commits provided}"
+            PR_BODY="${PR_BODY:-No description provided.}"
+            PR_LABELS="${PR_LABELS:-No labels assigned.}"
+  
+            OTHER_CHANGES=""
+            BUG_FIXES=""
+            FEATURES=""
+  
+            DESCRIPTION_FEATURES=$(echo "$PR_BODY" | grep -i "##Feature" -A 10)
+            DESCRIPTION_BUGS=$(echo "$PR_BODY" | grep -i "##bug" -A 10)
+  
+            IFS=$'\n' read -rd '' -a COMMIT_ARRAY <<< "$COMMITS"
+  
+            for COMMIT in "${COMMIT_ARRAY[@]}"; do
+              if echo "$COMMIT" | grep -q "bug"; then
+                BUG_FIXES="${BUG_FIXES}\n- Bug fix: $COMMIT"
+              elif echo "$COMMIT" | grep -q "feature"; then
+                FEATURES="${FEATURES}\n- Feature: $COMMIT"
+              else
+                OTHER_CHANGES="${OTHER_CHANGES}\n- Other change: $COMMIT"
+              fi
+            done
+  
+            echo -e "## Release v${NEW_VERSION}\n" > release_notes.md
+            echo -e "### Description\n$PR_BODY\n" >> release_notes.md
+            echo -e "### Features\n$FEATURES\n" >> release_notes.md
+            echo -e "### Bug Fixes\n$BUG_FIXES\n" >> release_notes.md
+            echo -e "### Other Changes\n$OTHER_CHANGES\n" >> release_notes.md
+            echo "Release notes generated."
+        - name: Create Release
+          run: |
+            gh release create "$NEW_VERSION" release_notes.md \
+              --title "Release $NEW_VERSION" \
+              --notes-file release_notes.md
+          env:
+            GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  
