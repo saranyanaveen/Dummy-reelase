@@ -33,18 +33,23 @@ jobs:
           PR_BODY="${{ github.event.pull_request.body }}"
           PR_LABELS=$(echo '${{ toJson(github.event.pull_request.labels) }}' | jq -r '.[].name')
 
-          # Escape special characters and newlines in PR_BODY for GitHub Actions environment variables
-          PR_BODY_ESCAPED=$(echo "$PR_BODY" | sed ':a;N;$!ba;s/\n/\\n/g')
-          PR_TITLE_ESCAPED=$(echo "$PR_TITLE" | sed ':a;N;$!ba;s/\n/\\n/g' | sed 's/"/\\"/g')  # Escape newlines and quotes
-          PR_LABELS_ESCAPED=$(echo "$PR_LABELS" | sed ':a;N;$!ba;s/\n/\\n/g' | sed 's/"/\\"/g')  # Escape newlines and quotes
+          # Escape special characters (e.g., single quotes, newlines) for PR_TITLE, PR_BODY, and PR_LABELS
+          PR_TITLE_ESCAPED=$(echo "$PR_TITLE" | sed ':a;N;$!ba;s/\n/\\n/g' | sed "s/'/\\'/g" | sed 's/"/\\"/g')
+          PR_BODY_ESCAPED=$(echo "$PR_BODY" | sed ':a;N;$!ba;s/\n/\\n/g' | sed "s/'/\\'/g" | sed 's/"/\\"/g')
+          PR_LABELS_ESCAPED=$(echo "$PR_LABELS" | sed ':a;N;$!ba;s/\n/\\n/g' | sed "s/'/\\'/g" | sed 's/"/\\"/g')
+
           echo "PR_TITLE=$PR_TITLE_ESCAPED" >> $GITHUB_ENV
           echo "PR_BODY=$PR_BODY_ESCAPED" >> $GITHUB_ENV
           echo "PR_LABELS=$PR_LABELS_ESCAPED" >> $GITHUB_ENV
+
       - name: Get All Commit Messages
         id: commits
         run: |
-          COMMITS=$(git log --pretty=format:"%s" ${{ github.event.pull_request.merge_commit_sha }}^..${{ github.event.pull_request.merge_commit_sha }})
-          echo "COMMITS=$COMMITS" >> $GITHUB_ENV
+          # Ensure proper escaping of commit messages
+          COMMITS=$(git log --pretty=format:"%s" 5d451be34630582d32a1be67acc1f158586525a5^..5d451be34630582d32a1be67acc1f158586525a5)
+          COMMITS_ESCAPED=$(echo "$COMMITS" | sed ':a;N;$!ba;s/\n/\\n/g' | sed "s/'/\\'/g" | sed 's/"/\\"/g')
+          echo "COMMITS=$COMMITS_ESCAPED" >> $GITHUB_ENV
+
 
       - name: Determine Version Bump
         id: bump_version
