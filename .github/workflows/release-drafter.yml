@@ -100,13 +100,16 @@ jobs:
           OTHER_CHANGES=""
           BUG_FIXES=""
           FEATURES=""
-
+          
           # Separate description sections (e.g., ## Feature, ## Bug Fixes) from the body if needed
           DESCRIPTION_FEATURES=$(echo "$PR_BODY" | grep -i "##Feature" -A 10)
           DESCRIPTION_BUGS=$(echo "$PR_BODY" | grep -i "##bug" -A 10)
 
+          # Split the commit messages into an array and loop through them
+          IFS=$'\n' read -rd '' -a COMMIT_ARRAY <<< "$COMMITS"
+          
           # Categorize commit messages into Feature, Bug Fixes, etc.
-          for COMMIT in $COMMITS; do
+          for COMMIT in "${COMMIT_ARRAY[@]}"; do
             if echo "$COMMIT" | grep -q "bug"; then
               BUG_FIXES="${BUG_FIXES}\n- Bug fix: $COMMIT"
             elif echo "$COMMIT" | grep -q "feature"; then
@@ -116,7 +119,7 @@ jobs:
             fi
           done
 
-          # Combine everything
+          # Combine everything into the final release notes
           echo -e "## Release v${NEW_VERSION}\n" > release_notes.md
           echo -e "### Description\n$PR_BODY\n" >> release_notes.md
           echo -e "### Features\n$FEATURES\n" >> release_notes.md
