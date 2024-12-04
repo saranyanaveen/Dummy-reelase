@@ -71,12 +71,31 @@ jobs:
 
       - name: Generate Release Notes
         run: |
-          echo -e "## Release v${NEW_VERSION}\n" > release_notes.md
-          echo -e "### Feature:\n" >> release_notes.md
-          echo "$PR_BODY" | awk '/### Feature:/{flag=1;next}/###/{flag=0}flag' >> release_notes.md
-          echo -e "\n### Bug Fixes:\n" >> release_notes.md
-
-          echo "$PR_BODY" | awk '/### Bug Fixes:/{flag=1;next}/###/{flag=0}flag' >> release_notes.md
+            echo -e "## Release v${NEW_VERSION}\n" > release_notes.md
+            
+            # Initialize categories for feature and bug comments
+            FEATURE_COMMENTS=""
+            BUG_COMMENTS=""
+        
+            # Loop through each line in the PR body and categorize based on the presence of "feature" or "bug"
+            while IFS= read -r line; do
+              # Check if the line contains the word "feature" (case-insensitive)
+              if echo "$line" | grep -i "feature" > /dev/null; then
+                FEATURE_COMMENTS+="- $line\n"
+              # Check if the line contains the word "bug" (case-insensitive)
+              elif echo "$line" | grep -i "bug" > /dev/null; then
+                BUG_COMMENTS+="- $line\n"
+              fi
+            done <<< "$PR_BODY"
+        
+            # Add categorized comments to the release notes
+            if [ -n "$FEATURE_COMMENTS" ]; then
+              echo -e "### Feature:\n$FEATURE_COMMENTS" >> release_notes.md
+            fi
+            if [ -n "$BUG_COMMENTS" ]; then
+              echo -e "\n### Bug Fixes:\n$BUG_COMMENTS" >> release_notes.md
+            fi
+        
 
 
       - name: Create GitHub Release
