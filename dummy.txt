@@ -50,6 +50,7 @@ test=8
 example-7
 test=9
 eample=9
+example=7
 
 rty
 bnm
