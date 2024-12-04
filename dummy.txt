@@ -51,6 +51,7 @@ example-7
 test=9
 eample=9
 example=7
+example=10
 
 rty
 bnm
