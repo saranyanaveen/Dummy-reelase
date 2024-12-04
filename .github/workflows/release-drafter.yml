@@ -96,6 +96,7 @@ jobs:
               echo -e "\n### Bug Fixes:\n$BUG_COMMENTS" >> release_notes.md
             fi
         
+
       - name: Create GitHub Release
         run: |
           gh release create "$NEW_VERSION" release_notes.md \
