@@ -17,9 +17,7 @@
             fetch-depth: 0
         - name: Get PR Details
           id: pr_details
-
-          run: |
-
+          run: >
             PR_TITLE="${{ github.event.pull_request.title }}"
   
             PR_BODY="${{ github.event.pull_request.body }}"
@@ -76,9 +74,7 @@
             echo "New version: $NEW_VERSION"
             echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
         - name: Generate Release Notes
-
           run: |
-
             RELEASE_DATE=$(date '+%Y-%m-%d')
   
   
@@ -120,7 +116,7 @@
               for keyword in "${MAJOR_KEYWORDS[@]}"; do
                 if echo "$line" | grep -i "$keyword" > /dev/null; then
                   MAJOR_COMMENTS+="- $line\n"
-                  break 2 # Exit all loops for this line once categorized as major
+                  break # Exit all loops for this line once categorized as major
                 fi
               done
               # Check if the line contains any feature-related keyword (case-insensitive)
@@ -174,7 +170,6 @@
             if [ -n "$MAINTENANCE_COMMENTS" ]; then
               echo -e "\n### Maintenance:\n$MAINTENANCE_COMMENTS" >> release_notes.md
             fi 
-
             if [ -n "$MAJOR_COMMENTS" ]; then
               echo -e "\n### Major Changes:\n$MAJOR_COMMENTS" >> release_notes.md
             fi
