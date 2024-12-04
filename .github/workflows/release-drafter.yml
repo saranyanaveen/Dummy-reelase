@@ -71,7 +71,9 @@ jobs:
 
       - name: Generate Release Notes
         run: |
-            echo -e "## Release ${NEW_VERSION}\n" > release_notes.md
+            RELEASE_DATE=$(date '+%Y-%m-%d')
+
+            echo -e "## Release ${NEW_VERSION} - ${RELEASE_DATE}\n" > release_notes.md
             
             # Initialize categories for each type of change
             FEATURE_COMMENTS=""
