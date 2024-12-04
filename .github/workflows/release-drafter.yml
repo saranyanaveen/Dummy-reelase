@@ -23,19 +23,22 @@ jobs:
           PR_BODY="${{ github.event.pull_request.body }}"
 
           # Capture the labels assigned to the PR
-          PR_LABELS=$(echo '${{ toJson(github.event.pull_request.labels) }}' | jq -r '.[].name')
+          PR_LABELS=$(echo '${{ toJson(github.event.pull_request.labels) }}' | jq -r '.[].name' | paste -sd ',' -) # Combine labels into a comma-separated string
 
           echo "PR_TITLE=$PR_TITLE" >> $GITHUB_ENV
-          
-          # Handle multi-line PR_BODY by escaping newlines
-          echo -e "PR_BODY<<EOF\n$PR_BODY\nEOF" >> $GITHUB_ENV
-          
+
+          # Handle multi-line PR_BODY properly by writing it to a separate file and using `<<EOF` for environment variables
+          echo "PR_BODY<<EOF" >> $GITHUB_ENV
+          echo "$PR_BODY" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
           echo "PR_LABELS=$PR_LABELS" >> $GITHUB_ENV
 
       - name: Debug Output
         run: |
           echo "Pull Request Title: $PR_TITLE"
-          echo "Pull Request Body: $PR_BODY"
+          echo "Pull Request Body:"
+          echo "$PR_BODY"
           echo "Labels: $PR_LABELS"
 
       - name: Get Latest Tag
@@ -68,32 +71,11 @@ jobs:
 
       - name: Generate Release Notes
         run: |
-            PR_BODY="${PR_BODY:-No description provided.}"
-            FEATURES=""
-            BUG_FIXES=""
-            OTHER_CHANGES=""
-
-            # Split the PR body into sections based on markers (e.g., '### Feature', '### Bug fix')
-            IFS='###' read -r -a PR_MESSAGES <<< "$PR_BODY"
-
-            # Categorize the messages under different headings
-            for MESSAGE in "${PR_MESSAGES[@]}"; do
-              MESSAGE=$(echo "$MESSAGE" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')  # Trim spaces
-              if [[ "$MESSAGE" == *"feature"* || "$MESSAGE" == *"Feature"* ]]; then
-                FEATURES="${FEATURES}\n- $MESSAGE"
-              elif [[ "$MESSAGE" == *"bug fix"* || "$MESSAGE" == *"Bug fix"* ]]; then
-                BUG_FIXES="${BUG_FIXES}\n- $MESSAGE"
-              else
-                OTHER_CHANGES="${OTHER_CHANGES}\n- $MESSAGE"
-              fi
-            done
-
-            # Create release notes with categorized content
-            echo -e "## Release v${NEW_VERSION}\n" > release_notes.md
-            echo -e "### Feature:\n$FEATURES\n" >> release_notes.md
-            echo -e "### Bug fixes\n$BUG_FIXES\n" >> release_notes.md
-            echo -e "### Other changes\n$OTHER_CHANGES\n" >> release_notes.md
-            echo "Release notes generated."
+          echo -e "## Release v${NEW_VERSION}\n" > release_notes.md
+          echo -e "### Feature:\n" >> release_notes.md
+          echo "$PR_BODY" | awk '/### Feature:/{flag=1;next}/###/{flag=0}flag' >> release_notes.md
+          echo -e "\n### Bug Fixes:\n" >> release_notes.md
+          echo "$PR_BODY" | awk '/### Bug fix:/{flag=1;next}/###/{flag=0}flag' >> release_notes.md
 
       - name: Create GitHub Release
         run: |
