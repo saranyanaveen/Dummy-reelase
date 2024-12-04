@@ -71,28 +71,34 @@ jobs:
 
       - name: Generate Release Notes
         run: |
-<<<<<<< HEAD
             RELEASE_DATE=$(date '+%Y-%m-%d')
 
             echo -e "## Release ${NEW_VERSION} - ${RELEASE_DATE}\n" > release_notes.md
-=======
-            echo -e "## Release ${NEW_VERSION}\n" > release_notes.md
->>>>>>> df01ca00630e2601915360b637a522d0eb7f0624
             
             # Initialize categories for each type of change
             FEATURE_COMMENTS=""
             BUG_COMMENTS=""
             OTHER_COMMENTS=""
             MAINTENANCE_COMMENTS=""
+            MAJOR_COMMENTS=""
         
             # Define keywords for each category
             FEATURE_KEYWORDS=("feature" "feat" "enhancement")
             BUG_KEYWORDS=("bug" "bugfix" "defect")
             OTHER_KEYWORDS=("other" "document" "docs")
             MAINTENANCE_KEYWORDS=("chore" "refactor" "maintenance")
-        
+            MAJOR_KEYWORDS=("major" "stable" "breaking change")
+
             # Loop through each line in the PR body and categorize based on the presence of keywords
             while IFS= read -r line; do
+              
+              # Check for major-related changes
+              for keyword in "${MAJOR_KEYWORDS[@]}"; do
+                  if echo "$line" | grep -i "$keyword" > /dev/null; then
+                    MAJOR_COMMENTS+="- $line\n"
+                    break
+                  fi
+                 done
               # Check if the line contains any feature-related keyword (case-insensitive)
               for keyword in "${FEATURE_KEYWORDS[@]}"; do
                 if echo "$line" | grep -i "$keyword" > /dev/null; then
