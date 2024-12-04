@@ -17,7 +17,13 @@
             fetch-depth: 0
         - name: Get PR Details
           id: pr_details
+<<<<<<< HEAD
           run: >
+=======
+
+          run: |
+
+>>>>>>> c269dad36adf221da4b416f94792556140811d6b
             PR_TITLE="${{ github.event.pull_request.title }}"
   
             PR_BODY="${{ github.event.pull_request.body }}"
@@ -74,7 +80,9 @@
             echo "New version: $NEW_VERSION"
             echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
         - name: Generate Release Notes
+
           run: |
+
             RELEASE_DATE=$(date '+%Y-%m-%d')
   
   
