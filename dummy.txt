@@ -31,8 +31,11 @@ klkj
 zczxv
 
 asd
-dfgg
-xvbbv
-werw
+qweasd
+
+x=5
+result=fact(x)
+print(x)
+
 qwe
 
