@@ -31,7 +31,13 @@ klkj
 zczxv
 
 asd
+<<<<<<< HEAD
 sdfg
 
+=======
+dfgg
+xvbbv
+werw
+>>>>>>> 22b71e37c029b032be1e4aadf468bcd03d3f9c02
 qwe
 
