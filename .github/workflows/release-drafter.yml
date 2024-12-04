@@ -171,7 +171,7 @@
               echo -e "\n### Maintenance:\n$MAINTENANCE_COMMENTS" >> release_notes.md
             fi 
             if [ -n "$MAJOR_COMMENTS" ]; then
-              echo -e "### Major Changes:\n$MAJOR_COMMENTS" >> release_notes.md
+              echo -e "\n### Major Changes:\n$MAJOR_COMMENTS" >> release_notes.md
             fi
         - name: Create GitHub Release
           run: |
