@@ -31,11 +31,8 @@ klkj
 zczxv
 
 asd
-qweasd
-
-x=5
-result=fact(x)
-print(x)
-
+sdfg
+test=2
+example=5
 qwe
 
