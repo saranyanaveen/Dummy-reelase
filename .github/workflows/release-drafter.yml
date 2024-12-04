@@ -1,6 +1,7 @@
 <<<<<<< HEAD
 =======
 
+<<<<<<< HEAD
 >>>>>>> daa6b5c0362129c3220af4a13189fff993dfbebc
 ---
   
@@ -61,6 +62,10 @@
         - name: Generate Release Notes
           run: >
 =======
+=======
+
+---
+>>>>>>> bb48c14d4f62df276f6574330bf92a098e37d67f
 name: Create Release Notes
 
 on:
@@ -140,7 +145,11 @@ jobs:
 
             # Get the current date in the format YYYY-MM-DD
 
+<<<<<<< HEAD
 >>>>>>> daa6b5c0362129c3220af4a13189fff993dfbebc
+=======
+
+>>>>>>> bb48c14d4f62df276f6574330bf92a098e37d67f
             RELEASE_DATE=$(date '+%Y-%m-%d')
   
   
@@ -235,14 +244,18 @@ jobs:
   
             if [ -n "$MAINTENANCE_COMMENTS" ]; then
               echo -e "\n### Maintenance:\n$MAINTENANCE_COMMENTS" >> release_notes.md
+<<<<<<< HEAD
               
             if [ -n "$MAJOR_COMMENTS" ]; then
+=======
+            fi if [ -n "$MAJOR_COMMENTS" ]; then
+>>>>>>> bb48c14d4f62df276f6574330bf92a098e37d67f
               echo -e "### Major Changes:\n$MAJOR_COMMENTS" >> release_notes.md
             fi
-        - name: Create GitHub Release
-          run: |
+      - name: Create GitHub Release
+        run: |
             gh release create "$NEW_VERSION" release_notes.md \
               --title "Release $NEW_VERSION" \
               --notes-file release_notes.md
-          env:
+        env:
             GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
