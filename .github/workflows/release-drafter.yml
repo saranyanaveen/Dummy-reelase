@@ -1,66 +1,6 @@
-<<<<<<< HEAD
-=======
 
->>>>>>> 6302c028c28611ce7144cce989628af6918c85c9
+
 ---
-  
-<<<<<<< HEAD
-            PR_BODY="${{ github.event.pull_request.body }}"
-  
-  
-            # Capture the labels assigned to the PR
-  
-            PR_LABELS=$(echo '${{ toJson(github.event.pull_request.labels) }}' | jq -r '.[].name' | paste -sd ',' -) # Combine labels into a comma-separated string
-  
-  
-            echo "PR_TITLE=$PR_TITLE" >> $GITHUB_ENV
-  
-  
-            # Handle multi-line PR_BODY properly by writing it to a separate file and using `<<EOF` for environment variables
-  
-            echo "PR_BODY<<EOF" >> $GITHUB_ENV
-  
-            echo "$PR_BODY" >> $GITHUB_ENV
-  
-            echo "EOF" >> $GITHUB_ENV
-  
-  
-            echo "PR_LABELS=$PR_LABELS" >> $GITHUB_ENV
-        - name: Debug Output
-          run: |
-            echo "Pull Request Title: $PR_TITLE"
-            echo "Pull Request Body:"
-            echo "$PR_BODY"
-            echo "Labels: $PR_LABELS"
-        - name: Get Latest Tag
-          id: get_latest_tag
-          run: |
-            LATEST_TAG=$(git tag --sort=-v:refname | head -n 1 || echo "v0.0.0")
-            VERSION=${LATEST_TAG#v}
-            echo "Latest tag: $LATEST_TAG"
-            IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
-            echo "MAJOR=$MAJOR" >> $GITHUB_ENV
-            echo "MINOR=$MINOR" >> $GITHUB_ENV
-            echo "PATCH=$PATCH" >> $GITHUB_ENV
-        - name: Increment Version
-          id: increment_version
-          run: |
-            if [[ "$PR_LABELS" == *"major"* ]]; then
-              MAJOR=$((MAJOR + 1))
-              MINOR=0
-              PATCH=0
-            elif [[ "$PR_LABELS" == *"minor"* ]]; then
-              MINOR=$((MINOR + 1))
-              PATCH=0
-            elif [[ "$PR_LABELS" == *"patch"* ]]; then
-              PATCH=$((PATCH + 1))
-            fi
-            NEW_VERSION="v$MAJOR.$MINOR.$PATCH"
-            echo "New version: $NEW_VERSION"
-            echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
-        - name: Generate Release Notes
-          run: >
-=======
 name: Create Release Notes
 
 on:
@@ -140,7 +80,7 @@ jobs:
 
             # Get the current date in the format YYYY-MM-DD
 
->>>>>>> 6302c028c28611ce7144cce989628af6918c85c9
+
             RELEASE_DATE=$(date '+%Y-%m-%d')
   
   
@@ -238,10 +178,10 @@ jobs:
             fi if [ -n "$MAJOR_COMMENTS" ]; then
               echo -e "### Major Changes:\n$MAJOR_COMMENTS" >> release_notes.md
             fi
-        - name: Create GitHub Release
-          run: |
+      - name: Create GitHub Release
+        run: |
             gh release create "$NEW_VERSION" release_notes.md \
               --title "Release $NEW_VERSION" \
               --notes-file release_notes.md
-          env:
+        env:
             GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
