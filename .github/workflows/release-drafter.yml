@@ -71,7 +71,7 @@ jobs:
 
       - name: Generate Release Notes
         run: |
-            echo -e "## Release v${NEW_VERSION}\n" > release_notes.md
+            echo -e "## Release ${NEW_VERSION}\n" > release_notes.md
             
             # Initialize categories for each type of change
             FEATURE_COMMENTS=""
