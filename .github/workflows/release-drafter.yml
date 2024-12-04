@@ -71,6 +71,11 @@ jobs:
 
       - name: Generate Release Notes
         run: |
+
+
+           
+
+            # Get the current date in the format YYYY-MM-DD
             RELEASE_DATE=$(date '+%Y-%m-%d')
 
             echo -e "## Release ${NEW_VERSION} - ${RELEASE_DATE}\n" > release_notes.md
