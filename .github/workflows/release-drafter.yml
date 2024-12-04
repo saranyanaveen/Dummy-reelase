@@ -75,7 +75,7 @@ jobs:
           echo -e "### Feature:\n" >> release_notes.md
           echo "$PR_BODY" | awk '/### Feature:/{flag=1;next}/###/{flag=0}flag' >> release_notes.md
           echo -e "\n### Bug Fixes:\n" >> release_notes.md
-          echo "$PR_BODY" | awk '/### Bug fix:/{flag=1;next}/###/{flag=0}flag' >> release_notes.md
+          echo "$PR_BODY" | awk '/### Bug fixes:/{flag=1;next}/###/{flag=0}flag' >> release_notes.md
 
       - name: Create GitHub Release
         run: |
