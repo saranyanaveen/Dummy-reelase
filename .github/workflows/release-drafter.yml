@@ -73,13 +73,17 @@ jobs:
         run: |
             echo -e "## Release v${NEW_VERSION}\n" > release_notes.md
             
-            # Initialize categories for feature and bug comments
+            # Initialize categories for each type of change
             FEATURE_COMMENTS=""
             BUG_COMMENTS=""
+            OTHER_COMMENTS=""
+            MAINTENANCE_COMMENTS=""
         
-            # Define feature-related keywords and bug-related keywords
+            # Define keywords for each category
             FEATURE_KEYWORDS=("feature" "feat" "enhancement")
             BUG_KEYWORDS=("bug" "bugfix" "defect")
+            OTHER_KEYWORDS=("other" "document" "docs")
+            MAINTENANCE_KEYWORDS=("chore" "refactor" "maintenance")
         
             # Loop through each line in the PR body and categorize based on the presence of keywords
             while IFS= read -r line; do
@@ -98,6 +102,22 @@ jobs:
                   break # Exit the loop once a match is found
                 fi
               done
+        
+              # Check if the line contains any other-related keyword (case-insensitive)
+              for keyword in "${OTHER_KEYWORDS[@]}"; do
+                if echo "$line" | grep -i "$keyword" > /dev/null; then
+                  OTHER_COMMENTS+="- $line\n"
+                  break # Exit the loop once a match is found
+                fi
+              done
+        
+              # Check if the line contains any maintenance-related keyword (case-insensitive)
+              for keyword in "${MAINTENANCE_KEYWORDS[@]}"; do
+                if echo "$line" | grep -i "$keyword" > /dev/null; then
+                  MAINTENANCE_COMMENTS+="- $line\n"
+                  break # Exit the loop once a match is found
+                fi
+              done
             done <<< "$PR_BODY"
         
             # Add categorized comments to the release notes
@@ -107,6 +127,13 @@ jobs:
             if [ -n "$BUG_COMMENTS" ]; then
               echo -e "\n### Bug Fixes:\n$BUG_COMMENTS" >> release_notes.md
             fi
+            if [ -n "$OTHER_COMMENTS" ]; then
+              echo -e "\n### Other Changes:\n$OTHER_COMMENTS" >> release_notes.md
+            fi
+            if [ -n "$MAINTENANCE_COMMENTS" ]; then
+              echo -e "\n### Maintenance:\n$MAINTENANCE_COMMENTS" >> release_notes.md
+            fi
+        
         
         
       - name: Create GitHub Release
