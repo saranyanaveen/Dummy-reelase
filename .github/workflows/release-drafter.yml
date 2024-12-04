@@ -71,13 +71,14 @@ jobs:
 
       - name: Generate Release Notes
         run: |
-<<<<<<< HEAD
+
+           
+
+            # Get the current date in the format YYYY-MM-DD
             RELEASE_DATE=$(date '+%Y-%m-%d')
 
             echo -e "## Release ${NEW_VERSION} - ${RELEASE_DATE}\n" > release_notes.md
-=======
-            echo -e "## Release ${NEW_VERSION}\n" > release_notes.md
->>>>>>> df01ca00630e2601915360b637a522d0eb7f0624
+
             
             # Initialize categories for each type of change
             FEATURE_COMMENTS=""
