@@ -17,7 +17,9 @@
             fetch-depth: 0
         - name: Get PR Details
           id: pr_details
-          run: >
+
+          run: |
+
             PR_TITLE="${{ github.event.pull_request.title }}"
   
             PR_BODY="${{ github.event.pull_request.body }}"
@@ -74,7 +76,9 @@
             echo "New version: $NEW_VERSION"
             echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
         - name: Generate Release Notes
-          run: >
+
+          run: |
+
             RELEASE_DATE=$(date '+%Y-%m-%d')
   
   
@@ -170,6 +174,7 @@
             if [ -n "$MAINTENANCE_COMMENTS" ]; then
               echo -e "\n### Maintenance:\n$MAINTENANCE_COMMENTS" >> release_notes.md
             fi 
+
             if [ -n "$MAJOR_COMMENTS" ]; then
               echo -e "\n### Major Changes:\n$MAJOR_COMMENTS" >> release_notes.md
             fi
