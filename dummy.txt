@@ -30,14 +30,16 @@ ouy
 klkj
 zczxv
 
-asd
-<<<<<<< HEAD
+sdfg
+test=2
+example=5
+
 sdfg
 
-=======
+
 dfgg
 xvbbv
 werw
->>>>>>> 22b71e37c029b032be1e4aadf468bcd03d3f9c02
+
 qwe
 
